@@ -11,6 +11,8 @@ import (
 
 func (cli *Client) Deposit(req MPayDepositReq) (*MPayDepositResponse, error) {
 
+	loc := time.FixedZone("UTC+8", 8*60*60)
+
 	// 构建支付URL
 	payUrl := fmt.Sprintf("bizId=%s&custNo=%d&amount=%s&orderNo=%d"+
 		"&noticeUrl=%s&backUrl=%s&clientIp=%s&currency=%s"+
@@ -23,7 +25,7 @@ func (cli *Client) Deposit(req MPayDepositReq) (*MPayDepositResponse, error) {
 		req.PayUrl,
 		utils.GetIP(),
 		req.PayCurrency,
-		req.CreateTime.UnixNano()/int64(time.Millisecond),
+		req.CreateTime.In(loc).UnixMilli(),
 		"1",
 		toJSONString(Ext{
 			Bank: Bank{
