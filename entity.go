@@ -1,135 +1,61 @@
-package go_buy365
+package go_mpay
+
+import (
+	"time"
+)
 
 // ----------pre order-------------------------
-
-type Buy365DepositReq struct {
-	OrderId     string `json:"order_id"`      // 订单ID
-	OrderAmount string `json:"order_amount"`  // 订单金额
-	SysNo       string `json:"sys_no"`        // 系统编号
-	UserId      string `json:"user_id"`       // 用户ID
-	OrderIp     string `json:"order_ip"`      // 订单IP
-	OrderTime   string `json:"order_time"`    // 订单时间
-	PayUserName string `json:"pay_user_name"` // 付款人姓名
+type MPayDepositReq struct {
+	UserID      int64      `json:"userId"`      // 用户ID
+	PayAmount   float64    `json:"payAmount"`   // 支付金额
+	ID          int64      `json:"id"`          //业务订单id
+	PayUrl      string     `json:"payUrl"`      // 支付链接
+	PayCurrency string     `json:"payCurrency"` // 支付货币
+	UserName    string     `json:"userName"`    // 用户name
+	CreateTime  *time.Time `json:"createTime"`  //业务订单撞见时间
 }
 
 //------------------------------------------------------------
 
-type Buy365DepositResponse struct {
-	Code   int    `json:"code"`   // 111 是正确
-	Status string `json:"status"` //success 是正确
-	Msg    string `json:"msg"`
-	Data   struct {
-		OrderNo string `json:"order_no"` // 订单编号
-		SendUrl string `json:"send_url"` // 发送URL
-		UserId  string `json:"user_id"`  // 用户ID
-	} `json:"data"`
-}
-
-// ----------withdraw-------------------------
-
-type Buy365WithdrawReq struct {
-	SysNo string `json:"sys_no"` // 申请sys_no唯一标识 610001
-}
-
-type Buy365WithdrawData struct {
-	UserName    string `json:"user_name"`    // 真实姓名
-	BankCardNo  string `json:"bankcard_no"`  // 卡号
-	SerialNo    string `json:"serial_no"`    // 订单号
-	BankAddress string `json:"bank_address"` // 支行地址
-	Amount      string `json:"amount"`       // 金额
-}
-
-type Buy365WithdrawResponse struct {
-	Code int    `json:"code"` //
-	Msg  string `json:"msg"`
-}
-
-// ----------withdraw confirm-------------------------
-
-type Buy365WithdrawConfirmReq struct {
-	Ids   string `json:"ids"`    //确认收款订单列表接口中获取的id，用英文逗号“,”拼接起来
-	SysNo string `json:"sys_no"` //申请sys_no唯一标识
-}
-
-type Buy365WithdrawConfirmResponse struct {
-	Code string `json:"code"` //
-	Msg  string `json:"msg"`
-}
-
-// ----------withdraw confirm-------------------------
-
-type Buy365OrderListReq struct {
-	SysNo string `json:"sys_no"` //申请sys_no唯一标识
-}
-
-type Buy365OrderListRsp struct {
-	Code   string                `json:"code"` //
-	Msg    string                `json:"msg"`
-	Result Buy365OrderPageResult `json:"result"`
-}
-
-type Buy365OrderPageResult struct {
-	TotalCount string             `json:"totalCount"` // 总记录数
-	TotalPage  int64              `json:"totalPage"`  // 总页数
-	Page       int64              `json:"page"`       // 当前页码
-	Data       []*Buy365OrderData `json:"data"`       // 订单数据列表
-}
-
-type Buy365OrderData struct {
-	ID                       string `json:"id"`
-	SysSerialNo              string `json:"sysSerialNo"`
-	Amount                   string `json:"amount"`
-	PayType                  string `json:"payType"`
-	UserName                 string `json:"userName"`
-	BankCardNo               string `json:"bankCardNo"`
-	BankAddress              string `json:"bankAddress"`
-	ChangeRate               string `json:"changeRate"`
-	HandlingFee              string `json:"handlingFee"`
-	MerchantSettleUSDTNumber string `json:"merchantSettleUSDTNumber"`
-	SerialNo                 string `json:"serialNo"`
-	CreateTime               string `json:"createTime"`
-	Remark                   string `json:"remark"`
-	NumRow                   string `json:"numRow"`
-	StatusName               string `json:"statusName"`
+type MPayDepositResponse struct {
+	Code float64 `json:"res"` // 1 是正确
+	Msg  string  `json:"msg"`
+	Ec   float64 `json:"ec"`
+	Data struct {
+		Fmt string `json:"fmt"`
+		Dtm string `json:"dtm"`
+		Lst string `json:"lst"`
+	} `json:"dt"`
 }
 
 // ---------------callback-----------------------
-type Buy365DepositCancelBackReq struct {
-	// 唯一订单号，商户下单时传过来的order_id
-	BillNo string `json:"bill_no"`
-	// 订单状态：1=订单已取消；2=订单已激活
-	BillStatus int `json:"bill_status"`
-	// 商户编号
-	SysNo string `json:"sys_no"`
-	// 签名，参照验签规范
+type MPayDepositBackReq struct {
+	OrderId     string `json:"orderId"`
+	Amount      string `json:"amount"`
+	OrderAmount string `json:"orderAmount"`
+	Currency    string `json:"currency"`
+	TradeTime   string `json:"tradeTime"`
+	Type        string `json:"type"`
+	Status      string `json:"status"`
+	// 算法：md5
+	// 内容：amount=200&currency=CNY&orderId=ES89760987
+	//&status=1&tradeTime=1541488344884&type=AlipayChannel
 	Sign string `json:"sign"`
+	Uuid string `json:"uuid"`
+	Key  string `json:"key"`
+	// 算法：md5
+	// 内容：amount=200&currency=CNY&orderId=ES89760987
+	//&status=0&tradeTime=1541488344884&type=AlipayChannel&key=RSA公钥+uuid
+	Signature string `json:"signature"`
+	// 算法：md5
+	// 内容：amount=200&currency=CNY&exAmount=2&exRate=7.0000000000&orderId=ES89760987&sourceCurrency=USD&status=0&tradeTime=1541488344884&type=AlipayChannel&key=RSA公钥+uuid
+	NSignature string `json:"_signature"`
+	TxID       string `json:"txid"`
+	Chain      string `json:"chain"`
+	BizId      string `json:"bizId"`
+	CustNo     string `json:"custNo"`
+	PayAddress string `json:"payAddress"`
+	ToAddress  string `json:"ToAddress"`
 }
 
-type Buy365DepositSucceedBackReq struct {
-	BillNo string `json:"bill_no"` // 必须包含订单号
-	Amount string `json:"amount"`  // 必须是数字字符串
-	SysNo  string `json:"sys_no"`  // 必须包含商户号
-	Sign   string `json:"sign"`    // 必须包含签名
-}
-
-type Buy365WithdrawCancelBackReq struct {
-	// 唯一订单号，商户下单时传过来的order_id
-	BillNo string `json:"bill_no"`
-	// 订单状态：1=订单已取消；2=订单已激活
-	BillStatus int `json:"bill_status"`
-	// 商户编号
-	SysNo string `json:"sys_no"`
-	// 签名，参照验签规范
-	Sign string `json:"sign"`
-}
-
-type Buy365WithdrawSucceedBackReq struct {
-	// 唯一订单号，商户下单时传过来的order_id
-	BillNo string `json:"bill_no"`
-	//订单金额
-	Amount string `json:"amount"`
-	//商户编号
-	SysNo string `json:"sys_no"`
-	//签名，参照验签规范
-	Sign string `json:"sign"`
-}
+//成功的话,返回 "{\"success\"}"

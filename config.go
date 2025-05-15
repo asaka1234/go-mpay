@@ -1,16 +1,11 @@
-package go_buy365
+package go_mpay
 
 const (
-	ACCESS_KEY = "hiahaihaihaihaihaiahiahihaih" //调用psp的签名key
-	BACK_KEY   = "hiahaihaihaihaihaiahiahihaih" //回调的签名key
+	BIZ_ID = "ahiahaih"   //商户id
+	SECRET = "haihaihaih" //秘钥
 
 	//deposit
-	BASE_URL = "https://swpapi.tpex.cc/UtInRecordApi/orderGateWay"
+	BASE_URL = "https://pay.xagfgsm.com/order/post" //充值url
 
-	//withdraw
-	WITHDRAW_URL         = "https://mmapi.proxima131.com/AjaxOpen/saveOutOrder"
-	WITHDRAW_CONFIRM_URL = "https://mmapi.proxima131.com/AjaxOpen/appealOutOrder"
-
-	//orderlist
-	ORDERLIST_URL = "https://mmapi.proxima131.com/AjaxOpen/getOutOrderList"
+	CALLBACK_URL = "http:/127.0.0.1" //充值回调地址
 )

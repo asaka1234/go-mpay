@@ -1,32 +1,27 @@
-package go_buy365
+package go_mpay
 
 import (
-	"github.com/asaka1234/go-buy365/utils"
+	"github.com/asaka1234/go-mpay/utils"
 	"github.com/go-resty/resty/v2"
 )
 
 type Client struct {
-	AccessKey string
-	BackKey   string
-
-	BaseURL            string
-	WithdrawURL        string
-	WithdrawConfirmURL string
-	OrderListURL       string
+	BizId       string
+	Secret      string
+	BaseURL     string
+	CallbackURL string
 
 	ryClient *resty.Client
 	logger   utils.Logger
 }
 
-func NewClient(logger utils.Logger, accessKey string, backKey string, baseURL string, withdrawURL, withdrawConfirmURL, orderListURL string) *Client {
+func NewClient(logger utils.Logger, bizId string, secret string, baseURL string, callbackUrl string) *Client {
 	return &Client{
-		AccessKey: accessKey,
-		BackKey:   backKey,
+		BizId:  bizId,
+		Secret: secret,
 
-		BaseURL:            baseURL,
-		WithdrawURL:        withdrawURL,
-		WithdrawConfirmURL: withdrawConfirmURL,
-		OrderListURL:       orderListURL,
+		BaseURL:     baseURL,
+		CallbackURL: callbackUrl,
 
 		ryClient: resty.New(), //client实例
 		logger:   logger,

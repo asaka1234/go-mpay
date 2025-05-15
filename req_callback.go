@@ -1,61 +1,37 @@
-package go_buy365
+package go_mpay
 
 import (
 	"errors"
-	"github.com/asaka1234/go-buy365/utils"
-	"github.com/fatih/structs"
+	"fmt"
+	"github.com/asaka1234/go-mpay/utils"
+	"strings"
 )
 
 // 充值的回调处理(传入一个处理函数)
-func (cli *Client) DepositCancelCallback(req Buy365DepositCancelBackReq, processor func(Buy365DepositCancelBackReq) error) error {
+func (cli *Client) DepositCallback(req MPayDepositBackReq, processor func(MPayDepositBackReq) error) error {
 	//验证签名
-	paramMap := structs.Map(req)
-	verifyResult := utils.VerifySignDeposit(paramMap, cli.BackKey)
-	if !verifyResult {
-		//验签失败
-		return errors.New("verify sign error!")
-	}
 
-	//开始处理
-	return processor(req)
-}
+	cli.logger.Infof("mpay<----%+v", req)
+	// amount=200&currency=CNY&orderId=ES89760987&status=0&tradeTime=1541488344884&type=AlipayChannel&key=RSA公钥+uuid
+	raw := fmt.Sprintf(
+		"amount=%s&currency=%s&orderId=%s&status=%s&tradeTime=%s&type=%s&key=%s%s",
+		req.Amount,
+		req.Currency,
+		req.OrderId,
+		req.Status,
+		req.TradeTime,
+		req.Type,
+		cli.Secret,
+		req.Uuid,
+	)
+	cli.logger.Infof("mpay<----raw: %s", raw)
 
-// 充值的回调处理(传入一个处理函数)
-func (cli *Client) depositSucceedBack(req Buy365DepositSucceedBackReq, processor func(Buy365DepositSucceedBackReq) error) error {
-	//验证签名
-	paramMap := structs.Map(req)
-	verifyResult := utils.VerifySignDeposit(paramMap, cli.BackKey)
-	if !verifyResult {
-		//验签失败
-		return errors.New("verify sign error!")
-	}
+	sign := utils.GetMD5([]byte(raw))
+	cli.logger.Infof("mpay<----md5: %s == %s ?", sign, req.Signature)
 
-	//开始处理
-	return processor(req)
-}
-
-// 充值的回调处理(传入一个处理函数)
-func (cli *Client) withdrawCancelBack(req Buy365WithdrawCancelBackReq, processor func(Buy365WithdrawCancelBackReq) error) error {
-	//验证签名
-	paramMap := structs.Map(req)
-	verifyResult := utils.VerifySignDeposit(paramMap, cli.BackKey)
-	if !verifyResult {
-		//验签失败
-		return errors.New("verify sign error!")
-	}
-
-	//开始处理
-	return processor(req)
-}
-
-// 充值的回调处理(传入一个处理函数)
-func (cli *Client) withdrawSucceedBack(req Buy365WithdrawSucceedBackReq, processor func(Buy365WithdrawSucceedBackReq) error) error {
-	//验证签名
-	paramMap := structs.Map(req)
-	verifyResult := utils.VerifySignDeposit(paramMap, cli.BackKey)
-	if !verifyResult {
-		//验签失败
-		return errors.New("verify sign error!")
+	if strings.ToLower(sign) != strings.ToLower(req.Signature) {
+		cli.logger.Errorf("sign verify failed")
+		return errors.New("sign verify failed")
 	}
 
 	//开始处理
